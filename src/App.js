@@ -1,107 +1,47 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Route } from 'react-router-dom'
-import Header from './components/Header'
-import Tasks from './components/Tasks'
-import AddTask from './components/AddTask'
-import Footer from './components/Footer'
-import About from './components/About'
+import taskState from './assets/state/taskState'
+import isAddTaskVisibleState from './assets/state/isAddTaskVisibleState'
+import Root from './components/Root'
 
 function App() {
 
-  const appUrl = 'http://localhost:5000'
-
-  const request = async (url, method = 'GET', data = []) => {
-    const params = {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      method
-    }
-
-    if (!['GET', 'HEAD'].includes(method)) {
-      params.body = JSON.stringify(data)
-    }
-
-    return await (await fetch(url, params)).json()
-  }
-
-  const [tasks, setTasks] = useState([])
-
-  const [isAddTaskButtonVisible, setIsAddTaskButtonVisible] = useState(false)
-
   useEffect(() => {
-    const getTasks = async () => {
-      const tasksFromServer = await fetchTasks()
-      setTasks(tasksFromServer)
-    }
-    getTasks()
+    taskState.setTasks = setTasks
+    isAddTaskVisibleState.setIsAddTaskVisible = setIsAddTaskVisible
+    taskState.fetchTasks()
   }, [])
 
-  // fetch tasks
-  const fetchTasks = async () => {
-    return await request(`${appUrl}/tasks`)
-  }
-
+  //tasks
+  const [tasks, setTasks] = useState(taskState.default)
   // Delete task
   const deleteTask = id => {
-    request(`${appUrl}/tasks/${id}`, 'DELETE')
-    setTasks(tasks.filter(task => task.id !== id))
+    taskState.deleteTask(tasks, id)
   }
-
   // Toggle reminder
   const toggleReminder = id => {
-    const task = tasks.find(task => task.id == id)
-    task.reminder = !task.reminder
-    request(`${appUrl}/tasks/${id}`, 'PATCH', task)
-    setTasks([...tasks])
+    taskState.toggleReminder(tasks, id)
   }
-
   // Add task
-  const addTask = async task => {
-    const res = await request(`${appUrl}/tasks`, 'POST', task)
-    setTasks([...tasks, res])
+  const addTask = task => {
+    taskState.addTask(tasks, task)
   }
 
-  const toggleIsAddTaskButtonVisible = () => {
-    setIsAddTaskButtonVisible(!isAddTaskButtonVisible)
+  // add task button
+  const [isAddTaskVisible, setIsAddTaskVisible] = useState(isAddTaskVisibleState.default)
+  // toggle is add task visible
+  const toggleIsAddTaskVisible = () => {
+    isAddTaskVisibleState.toggleIsAddTaskVisible(isAddTaskVisible)
   }
+  return <Root
 
-  return (
-    <Router>
-      <div className="container">
-        <Header
-          onToggleIsAddTaskButtonVisible = {toggleIsAddTaskButtonVisible}
-          isAddTaskButtonVisible = {isAddTaskButtonVisible}
-        />
-        <Route
-          path = '/'
-          exact
-          render = {props => (
-            <>
-              {isAddTaskButtonVisible && <AddTask
-                onAdd = {addTask}
-              />}
-              {tasks.length > 0
-                ? <Tasks
-                  tasks = {tasks}
-                  onDelete = {deleteTask}
-                  onToggle = {toggleReminder}
-                />
-                : <div>
-                  No Tasks
-                </div>}
-            </>
-          )}
-        />
-        <Route
-          path = '/about'
-          exact
-          component = {About}
-        />
-        <Footer />
-      </div>
-    </Router>
-  );
+    tasks = {tasks}
+    addTask = {addTask}
+    toggleReminder = {toggleReminder}
+    deleteTask = {deleteTask}
+
+    isAddTaskVisible = {isAddTaskVisible}
+    toggleIsAddTaskVisible = {toggleIsAddTaskVisible}
+  />
 }
 
 export default App;

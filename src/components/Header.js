@@ -1,7 +1,7 @@
 import Button from './Button'
 import { useLocation } from 'react-router-dom'
 
-const Header = ({ isAddTaskButtonVisible, onToggleIsAddTaskButtonVisible }) => {
+const Header = ({ isAddTaskVisible, onToggleIsAddTaskVisible }) => {
 
   const location = useLocation()
 
@@ -9,9 +9,9 @@ const Header = ({ isAddTaskButtonVisible, onToggleIsAddTaskButtonVisible }) => {
     <header className = 'header'>
       <h1>Task tracker</h1>
       {location.pathname === '/' && <Button
-        color = {isAddTaskButtonVisible ? 'red' : 'green'}
-        text = {isAddTaskButtonVisible ? 'Close' : 'Add'}
-        onClick = {onToggleIsAddTaskButtonVisible}
+        color = {isAddTaskVisible ? 'red' : 'green'}
+        text = {isAddTaskVisible ? 'Close' : 'Add'}
+        onClick = {onToggleIsAddTaskVisible}
       />}
     </header>
   )
